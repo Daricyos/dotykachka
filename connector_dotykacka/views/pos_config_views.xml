@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_config_dotykacka_view_form" model="ir.ui.view">
+        <field name="name">pos.config.dotykacka.form.view</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='warning_text_employees']" position="before">
+                <h2 name="order">Dotykacka</h2>
+                <div class="row mt16 o_settings_container">
+                    <div id="dotykacka" class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <field name="use_dotykacka"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="use_dotykacka" string="Process Orders in Dotykacka"/>
+                            <div class="text-muted">
+                                Should POS.Orders be sent to dotykacka?
+                            </div>
+                        </div>
+                    </div>
+                    <div id="dotykacka_branch" class="col-12 col-lg-6 o_setting_box" invisible="use_dotykacka == False">
+                        <div class="o_setting_left_pane">
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="dotykacka_branch_id" string="Branch ID" class="font-weight-normal"/>
+                            <field name="dotykacka_branch_id"/>
+                            <div class="text-muted">
+                                Cash Register ID
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

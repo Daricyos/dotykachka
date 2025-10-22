@@ -1,0 +1,66 @@
+<data>
+    <record model="ir.ui.view" id="product_category_dotykacka_form_view">
+        <field name="name">product.category.dotykacka.form.view</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <group name="first" position="after">
+                <group name="dotykacka_property">
+                    <group string="Dotykacka Properties">
+                        <field name="dotykacka_category_id"/>
+                    </group>
+                </group>
+            </group>
+        </field>
+    </record>
+    <record id="product_template_dotykacka_form_view" model="ir.ui.view">
+        <field name="name">product.template.form.dotykacka</field>
+        <field name="model">product.template</field>
+        <field name="priority">99</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='inventory']" position="after">
+                <page string="Dotykacka" name="dotykacka">
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="product_product_dotykacka_simple_form_view" model="ir.ui.view">
+        <field name="name">product.product.form.dotykacka.simple</field>
+        <field name="model">product.product</field>
+        <field name="priority">100</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='dotykacka']" position="inside">
+                <group>
+                    <group name="dotykacka_technical" string="Technical">
+                        <field name="dotykacka_id" string="ID"/>
+                        <field name="dotykacka_exported" string="Exported"/>
+                        <field name="dotykacka_last_update" string="Last Updated at"/>
+                        <field name="dotykacka_created_at" string="Created at"/>
+                        <field name="dotykacka_sync_disabled" string="Disabled Dotykacka Synchronization"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+    <record id="product_product_dotykacka_easy_form_view" model="ir.ui.view">
+        <field name="name">product.product.view.form.easy.inherit.dotykacka</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <sheet position="inside">
+                <group name="dotykacka" string="Dotykacka">
+                    <group name="dotykacka_technical" string="Technical">
+                        <field name="dotykacka_id" string="ID"/>
+                        <field name="dotykacka_exported" string="Exported"/>
+                        <field name="dotykacka_last_update" string="Last Updated at"/>
+                        <field name="dotykacka_created_at" string="Created at"/>
+                        <field name="dotykacka_sync_disabled" string="Disabled Dotykacka Synchronization"/>
+                    </group>
+                </group>
+            </sheet>
+        </field>
+    </record>
+</data>

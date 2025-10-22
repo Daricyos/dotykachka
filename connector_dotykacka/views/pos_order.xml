@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_order_dotykacka_form" model="ir.ui.view">
+        <field name="name">pos.order.dotykacka.form</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='refund']" position="after">
+                <button name="print_receipt"
+                        string="Print Receipt"
+                        type="object"
+                        invisible="dotykacka_order_id == False or sent_to_terminal == True"/>
+            </xpath>
+            <xpath expr="//button[@name='action_view_invoice']" position="before">
+                <button type="object"
+                        name="action_view_refunds"
+                        class="oe_stat_button"
+                        icon="fa-exchange"
+                        invisible="returns_count == 0"
+                        groups="base.group_user">
+                    <field name="returns_count" widget="statinfo"/>
+                </button>
+            </xpath>
+<!--            <xpath expr="//button[@name='action_view_invoice']" position="before">-->
+<!--                <button type="object"-->
+<!--                        name="action_view_dotykacka"-->
+<!--                        class="oe_stat_button"-->
+<!--                        icon="fa-link"-->
+<!--                        invisible="dotykacka_order_id == False"-->
+<!--                        groups="point_of_sale.group_pos_manager">-->
+<!--                    Dotykacka Order-->
+<!--                </button>-->
+<!--            </xpath>-->
+            <xpath expr="//field[@name='session_id']" position="after">
+                <field name="parent_id" invisible="1"/>
+                <field name="parent_id"
+                       widget="res_partner_many2one"
+                       invisible="parent_id == False"/>
+            </xpath>
+            <xpath expr="//page[@name='extra']" position="after">
+                <page string="Dotykacka" groups="point_of_sale.group_pos_manager">
+                    <group name="dotykacka_info" string="Info">
+                        <field name="dotykacka_order_id" readonly="1"/>
+                        <field name="sent_to_terminal" readonly="1"/>
+                        <field name="printed" readonly="1"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

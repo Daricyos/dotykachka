@@ -1,0 +1,20 @@
+<data>
+    <menuitem name="Dotykacka"
+              id="pos_dotykacka_configuration"
+              parent="point_of_sale.menu_point_config_product"
+              sequence="30"
+              groups="point_of_sale.group_pos_manager"/>
+    <menuitem
+            name="Orders"
+            id="menu_dotykacka_order"
+            parent="pos_dotykacka_configuration"
+            action="dotykacka_order_action"
+            sequence="0"/>
+    <menuitem
+            name="Queue"
+            id="menu_dotykacka_queue"
+            parent="pos_dotykacka_configuration"
+            action="dotykacka_queue_action"
+            sequence="1"/>
+</data>
+
