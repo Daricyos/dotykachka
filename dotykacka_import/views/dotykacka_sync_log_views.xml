@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sync Log Tree View -->
+    <record id="view_dotykacka_sync_log_tree" model="ir.ui.view">
+        <field name="name">dotykacka.sync.log.tree</field>
+        <field name="model">dotykacka.sync.log</field>
+        <field name="arch" type="xml">
+            <tree string="Sync Logs" create="false" edit="false">
+                <field name="create_date"/>
+                <field name="config_id"/>
+                <field name="entity_type"/>
+                <field name="entity_id"/>
+                <field name="status" decoration-success="status in ('created', 'updated')" decoration-warning="status == 'skipped'" decoration-danger="status == 'error'"/>
+                <field name="message"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Sync Log Form View -->
+    <record id="view_dotykacka_sync_log_form" model="ir.ui.view">
+        <field name="name">dotykacka.sync.log.form</field>
+        <field name="model">dotykacka.sync.log</field>
+        <field name="arch" type="xml">
+            <form string="Sync Log" create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="config_id"/>
+                            <field name="entity_type"/>
+                            <field name="entity_id"/>
+                        </group>
+                        <group>
+                            <field name="status"/>
+                            <field name="create_date"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="message"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_view_related" string="View Related Record" type="object" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Sync Log Action -->
+    <record id="action_dotykacka_sync_log" model="ir.actions.act_window">
+        <field name="name">Sync Logs</field>
+        <field name="res_model">dotykacka.sync.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_error': 1}</field>
+    </record>
+
+    <!-- Sync Log Search View -->
+    <record id="view_dotykacka_sync_log_search" model="ir.ui.view">
+        <field name="name">dotykacka.sync.log.search</field>
+        <field name="model">dotykacka.sync.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="entity_id"/>
+                <field name="config_id"/>
+                <filter string="Orders" name="orders" domain="[('entity_type', '=', 'order')]"/>
+                <filter string="Customers" name="customers" domain="[('entity_type', '=', 'customer')]"/>
+                <filter string="Products" name="products" domain="[('entity_type', '=', 'product')]"/>
+                <separator/>
+                <filter string="Errors" name="error" domain="[('status', '=', 'error')]"/>
+                <filter string="Created" name="created" domain="[('status', '=', 'created')]"/>
+                <filter string="Updated" name="updated" domain="[('status', '=', 'updated')]"/>
+                <filter string="Skipped" name="skipped" domain="[('status', '=', 'skipped')]"/>
+                <separator/>
+                <filter string="Today" name="today" domain="[('create_date', '&gt;=', datetime.datetime.now().replace(hour=0,minute=0,second=0))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Configuration" name="group_config" context="{'group_by': 'config_id'}"/>
+                    <filter string="Entity Type" name="group_entity_type" context="{'group_by': 'entity_type'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

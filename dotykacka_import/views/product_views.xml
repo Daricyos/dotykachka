@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Form View - Inherit -->
+    <record id="view_product_form_dotykacka" model="ir.ui.view">
+        <field name="name">product.product.form.dotykacka</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="is_dotykacka_import" invisible="1"/>
+                <field name="dotykacka_product_id" readonly="1" invisible="not is_dotykacka_import"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

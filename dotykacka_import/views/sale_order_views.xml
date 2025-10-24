@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sale Order Form View - Inherit -->
+    <record id="view_order_form_dotykacka" model="ir.ui.view">
+        <field name="name">sale.order.form.dotykacka</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="is_dotykacka_import" invisible="1"/>
+                <field name="dotykacka_order_id" readonly="1" invisible="not is_dotykacka_import"/>
+                <field name="dotykacka_receipt_number" readonly="1" invisible="not is_dotykacka_import"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_dotykacka_config" type="object" class="oe_stat_button" icon="fa-cog" invisible="not is_dotykacka_import">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Dotykacka Config</span>
+                    </div>
+                </button>
+                <button name="action_view_sync_logs" type="object" class="oe_stat_button" icon="fa-history" invisible="not is_dotykacka_import">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Sync Logs</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Sale Order Search View - Add Dotykacka filter -->
+    <record id="view_sales_order_filter_dotykacka" model="ir.ui.view">
+        <field name="name">sale.order.search.dotykacka</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='my_sale_orders_filter']" position="after">
+                <separator/>
+                <filter string="Dotykacka Orders" name="dotykacka_orders" domain="[('is_dotykacka_import', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

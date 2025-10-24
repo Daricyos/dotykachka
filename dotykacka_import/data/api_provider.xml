@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- API Provider for Dotykacka -->
+        <record id="provider_dotykacka" model="api_manager.provider">
+            <field name="name">Dotykacka API</field>
+            <field name="internal_reference">dotykacka</field>
+            <field name="server_domain">api.dotykacka.cz</field>
+            <field name="server_scheme">https</field>
+            <field name="authentication_method">bearer_token</field>
+            <field name="dynamic_token" eval="True"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_dotykacka_root" name="Dotykacka" sequence="100" web_icon="dotykacka_import,static/description/icon.png"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_dotykacka_config" name="Configuration" parent="menu_dotykacka_root" sequence="10" action="action_dotykacka_config"/>
+
+    <!-- Sync Logs Menu -->
+    <menuitem id="menu_dotykacka_sync_logs" name="Sync Logs" parent="menu_dotykacka_root" sequence="20" action="action_dotykacka_sync_log"/>
+
+    <!-- Webhooks Menu -->
+    <menuitem id="menu_dotykacka_webhooks" name="Webhooks" parent="menu_dotykacka_root" sequence="30" action="action_dotykacka_webhook"/>
+
+    <!-- Payment Methods Menu -->
+    <menuitem id="menu_dotykacka_payment_methods" name="Payment Methods" parent="menu_dotykacka_root" sequence="40" action="action_dotykacka_payment_method"/>
+
+    <!-- Payment Method Action -->
+    <record id="action_dotykacka_payment_method" model="ir.actions.act_window">
+        <field name="name">Payment Method Mapping</field>
+        <field name="res_model">dotykacka.payment.method</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Payment Method Views -->
+    <record id="view_dotykacka_payment_method_tree" model="ir.ui.view">
+        <field name="name">dotykacka.payment.method.tree</field>
+        <field name="model">dotykacka.payment.method</field>
+        <field name="arch" type="xml">
+            <tree string="Payment Method Mapping">
+                <field name="config_id"/>
+                <field name="dotykacka_method"/>
+                <field name="journal_id"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_dotykacka_payment_method_form" model="ir.ui.view">
+        <field name="name">dotykacka.payment.method.form</field>
+        <field name="model">dotykacka.payment.method</field>
+        <field name="arch" type="xml">
+            <form string="Payment Method Mapping">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="config_id"/>
+                            <field name="dotykacka_method"/>
+                        </group>
+                        <group>
+                            <field name="company_id" invisible="1"/>
+                            <field name="journal_id"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes" placeholder="Optional notes about this payment method mapping"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

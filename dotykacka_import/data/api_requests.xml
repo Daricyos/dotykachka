@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Get Orders -->
+        <record id="api_request_get_orders" model="api_manager.request">
+            <field name="name">Get Orders</field>
+            <field name="url_path">/v2/clouds/{cloud_id}/orders</field>
+            <field name="provider" ref="provider_dotykacka"/>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Get Single Order -->
+        <record id="api_request_get_order" model="api_manager.request">
+            <field name="name">Get Order</field>
+            <field name="url_path">/v2/clouds/{cloud_id}/orders/{order_id}</field>
+            <field name="provider" ref="provider_dotykacka"/>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Register Webhook -->
+        <record id="api_request_register_webhook" model="api_manager.request">
+            <field name="name">Register Webhook</field>
+            <field name="url_path">/v2/clouds/{cloud_id}/webhooks</field>
+            <field name="provider" ref="provider_dotykacka"/>
+            <field name="method">POST</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Delete Webhook -->
+        <record id="api_request_delete_webhook" model="api_manager.request">
+            <field name="name">Delete Webhook</field>
+            <field name="url_path">/v2/clouds/{cloud_id}/webhooks/{webhook_id}</field>
+            <field name="provider" ref="provider_dotykacka"/>
+            <field name="method">DELETE</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Get Customers -->
+        <record id="api_request_get_customers" model="api_manager.request">
+            <field name="name">Get Customers</field>
+            <field name="url_path">/v2/clouds/{cloud_id}/customers</field>
+            <field name="provider" ref="provider_dotykacka"/>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Get Products -->
+        <record id="api_request_get_products" model="api_manager.request">
+            <field name="name">Get Products</field>
+            <field name="url_path">/v2/clouds/{cloud_id}/products</field>
+            <field name="provider" ref="provider_dotykacka"/>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+    </data>
+</odoo>

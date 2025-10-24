@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Dotykacka Configuration Form View -->
+    <record id="view_dotykacka_config_form" model="ir.ui.view">
+        <field name="name">dotykacka.config.form</field>
+        <field name="model">dotykacka.config</field>
+        <field name="arch" type="xml">
+            <form string="Dotykacka Configuration">
+                <header>
+                    <button name="action_get_oauth_url" string="Authorize OAuth" type="object" class="oe_highlight" invisible="access_token"/>
+                    <button name="action_refresh_token" string="Refresh Token" type="object" invisible="not access_token"/>
+                    <button name="action_test_connection" string="Test Connection" type="object"/>
+                    <button name="action_register_webhooks" string="Register Webhooks" type="object" class="oe_highlight" invisible="webhook_registered"/>
+                    <button name="action_sync_now" string="Sync Now" type="object" class="btn-primary"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_dotykacka_sync_log)d" type="action" class="oe_stat_button" icon="fa-list">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Sync Logs</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <widget name="web_ribbon" title="Inactive" bg_color="text-bg-danger" invisible="active"/>
+
+                    <group>
+                        <group name="basic_info" string="Basic Information">
+                            <field name="name"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="cloud_id"/>
+                            <field name="api_provider_id"/>
+                        </group>
+                        <group name="oauth_info" string="OAuth Configuration">
+                            <field name="oauth_client_id" password="True"/>
+                            <field name="oauth_client_secret" password="True"/>
+                            <field name="oauth_redirect_uri" placeholder="https://your-odoo.com/dotykacka/oauth/callback"/>
+                            <field name="access_token" password="True" readonly="1"/>
+                            <field name="token_expires_at" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group name="webhook_info" string="Webhook Configuration">
+                            <field name="webhook_url" readonly="1"/>
+                            <field name="webhook_registered" readonly="1"/>
+                        </group>
+                        <group name="sync_settings" string="Sync Settings">
+                            <field name="import_on_site_orders"/>
+                            <field name="import_takeaway_orders"/>
+                            <field name="auto_confirm_orders"/>
+                            <field name="auto_create_invoice"/>
+                            <field name="auto_register_payment"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group name="defaults" string="Default Values">
+                            <field name="default_pricelist_id"/>
+                            <field name="default_warehouse_id"/>
+                            <field name="default_sales_team_id"/>
+                        </group>
+                        <group name="statistics" string="Statistics">
+                            <field name="last_sync_date" readonly="1"/>
+                            <field name="total_orders_imported" readonly="1"/>
+                            <field name="total_customers_imported" readonly="1"/>
+                            <field name="total_products_imported" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Webhooks" name="webhooks">
+                            <field name="webhook_ids">
+                                <tree>
+                                    <field name="event_type"/>
+                                    <field name="url"/>
+                                    <field name="registered"/>
+                                    <field name="trigger_count"/>
+                                    <field name="last_triggered"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Payment Methods" name="payment_methods">
+                            <field name="id" invisible="1"/>
+                            <button name="%(action_dotykacka_payment_method)d" string="Configure Payment Methods" type="action" class="oe_highlight" context="{'default_config_id': id}"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Dotykacka Configuration Tree View -->
+    <record id="view_dotykacka_config_tree" model="ir.ui.view">
+        <field name="name">dotykacka.config.tree</field>
+        <field name="model">dotykacka.config</field>
+        <field name="arch" type="xml">
+            <tree string="Dotykacka Configurations">
+                <field name="name"/>
+                <field name="cloud_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="webhook_registered" widget="boolean_toggle"/>
+                <field name="last_sync_date"/>
+                <field name="total_orders_imported"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Dotykacka Configuration Action -->
+    <record id="action_dotykacka_config" model="ir.actions.act_window">
+        <field name="name">Dotykacka Configuration</field>
+        <field name="res_model">dotykacka.config</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Dotykacka configuration
+            </p>
+            <p>
+                Configure the connection to Dotykacka POS system to start importing orders, customers, and products.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Account Move Form View - Inherit -->
+    <record id="view_move_form_dotykacka" model="ir.ui.view">
+        <field name="name">account.move.form.dotykacka</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="is_dotykacka_import" invisible="1"/>
+                <field name="dotykacka_order_id" readonly="1" invisible="not is_dotykacka_import"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

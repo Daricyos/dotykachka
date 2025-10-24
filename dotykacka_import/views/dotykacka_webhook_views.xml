@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Webhook Form View -->
+    <record id="view_dotykacka_webhook_form" model="ir.ui.view">
+        <field name="name">dotykacka.webhook.form</field>
+        <field name="model">dotykacka.webhook</field>
+        <field name="arch" type="xml">
+            <form string="Dotykacka Webhook">
+                <header>
+                    <button name="action_register" string="Register" type="object" class="oe_highlight" invisible="registered"/>
+                    <button name="action_unregister" string="Unregister" type="object" invisible="not registered"/>
+                    <button name="action_test" string="Test" type="object"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="config_id"/>
+                            <field name="event_type"/>
+                            <field name="url"/>
+                        </group>
+                        <group>
+                            <field name="webhook_id" readonly="1"/>
+                            <field name="registered" readonly="1"/>
+                            <field name="registered_date" readonly="1"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="trigger_count" readonly="1"/>
+                            <field name="last_triggered" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Webhook Action -->
+    <record id="action_dotykacka_webhook" model="ir.actions.act_window">
+        <field name="name">Webhooks</field>
+        <field name="res_model">dotykacka.webhook</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

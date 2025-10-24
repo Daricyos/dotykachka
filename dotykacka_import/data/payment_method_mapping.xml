@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default Payment Method Mappings -->
+        <!-- Note: These will need to be configured per company/configuration -->
+        <!-- This file serves as a template and documentation -->
+
+        <!--
+        <record id="payment_method_cash" model="dotykacka.payment.method">
+            <field name="config_id" ref="YOUR_CONFIG_ID"/>
+            <field name="dotykacka_method">CASH</field>
+            <field name="journal_id" ref="account.cash_journal"/>
+        </record>
+
+        <record id="payment_method_card" model="dotykacka.payment.method">
+            <field name="config_id" ref="YOUR_CONFIG_ID"/>
+            <field name="dotykacka_method">CARD</field>
+            <field name="journal_id" ref="account.bank_journal"/>
+        </record>
+        -->
+    </data>
+</odoo>
