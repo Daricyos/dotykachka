@@ -54,9 +54,9 @@
         'data/payment_method_data.xml',
         'data/cron.xml',
 
-        # Views
-        'views/dotykacka_config_views.xml',
+        # Views (order matters - sync_log_views must be loaded before config_views)
         'views/dotykacka_sync_log_views.xml',
+        'views/dotykacka_config_views.xml',
         'views/dotykacka_menu_views.xml',
     ],
     'installable': True,
