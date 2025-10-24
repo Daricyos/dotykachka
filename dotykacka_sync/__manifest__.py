@@ -46,6 +46,10 @@
         'security/security.xml',
         'security/ir.model.access.csv',
 
+        # API Manager: Providers and Requests
+        'data/providers.xml',
+        'data/requests.xml',
+
         # Data
         'data/payment_method_data.xml',
         'data/cron.xml',

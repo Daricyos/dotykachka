@@ -99,9 +99,35 @@ Dotykačka API has a limit of ~150 requests per 30 minutes. The module:
 
 ## Technical Details
 
+### Architecture
+
+This module is built on top of the **api_manager** module, which provides:
+- Centralized API request management
+- Provider configuration for API endpoints
+- Request templates for common operations
+- Built-in retry logic and error handling
+- Comprehensive logging
+
+### API Manager Integration
+
+**Providers:**
+- `DKSYNC_OAUTH`: OAuth token endpoint (api.dotykacka.cz)
+- `DKSYNC_API`: Dotykačka API v2 with Bearer token authentication
+
+**Request Templates:**
+- OAuth: Refresh Access Token
+- API: Get/List Customers, Products, Orders, Branches
+- API: Register Webhook
+
+All API calls are made through `api_manager.request` records, ensuring:
+- Consistent authentication handling
+- Automatic token refresh on expiration
+- Request/response logging
+- Error tracking
+
 ### Models
 - `dotykacka.config`: Main configuration
-- `dotykacka.oauth`: OAuth 2.0 handler
+- `dotykacka.oauth`: OAuth 2.0 handler (uses api_manager)
 - `dotykacka.sync.log`: Synchronization logs
 - `dotykacka.customer.sync`: Customer synchronization
 - `dotykacka.product.sync`: Product synchronization

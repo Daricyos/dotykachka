@@ -1,12 +1,14 @@
-import requests
 import json
 from datetime import datetime, timedelta
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class DotykackaOAuth(models.TransientModel):
-    """OAuth 2.0 handler for Dotykačka API."""
+    """OAuth 2.0 handler for Dotykačka API using api_manager."""
 
     _name = 'dotykacka.oauth'
     _description = 'Dotykačka OAuth Handler'
@@ -18,10 +20,35 @@ class DotykackaOAuth(models.TransientModel):
         ondelete='cascade',
     )
 
-    def _get_token_url(self):
-        """Get token endpoint URL."""
-        config = self.config_id
-        return f"{config.api_base_url}/{config.api_version}/signin/token"
+    def _get_oauth_request(self):
+        """Get OAuth token refresh request from api_manager."""
+        request = self.env['api_manager.request'].search([
+            ('name', '=', 'Refresh Access Token'),
+        ], limit=1)
+
+        if not request:
+            raise UserError(_('OAuth request not found in api_manager. Please check module installation.'))
+
+        return request
+
+    def _get_api_request(self, request_name):
+        """
+        Get API request by name from api_manager.
+
+        Args:
+            request_name (str): Request name
+
+        Returns:
+            api_manager.request: Request record
+        """
+        request = self.env['api_manager.request'].search([
+            ('name', '=', request_name),
+        ], limit=1)
+
+        if not request:
+            raise UserError(_('API request "%s" not found in api_manager.') % request_name)
+
+        return request
 
     def refresh_access_token(self):
         """
@@ -51,16 +78,17 @@ class DotykackaOAuth(models.TransientModel):
             }
 
         try:
-            # Make token request
-            response = requests.post(
-                self._get_token_url(),
-                json=payload,
-                headers={'Content-Type': 'application/json'},
-                timeout=30,
-            )
+            # Get OAuth request from api_manager
+            oauth_request = self._get_oauth_request()
 
-            response.raise_for_status()
-            token_data = response.json()
+            # Execute request
+            oauth_request.send_request(data=payload, return_type='decoded')
+
+            # Get response
+            if not oauth_request.success:
+                raise UserError(_('OAuth token refresh failed: %s') % oauth_request.error)
+
+            token_data = oauth_request.decode_response()
 
             # Validate response
             if 'accessToken' not in token_data:
@@ -81,13 +109,16 @@ class DotykackaOAuth(models.TransientModel):
 
             config.write(update_vals)
 
+            # Update token in api_manager provider
+            self._update_provider_token(token_data['accessToken'])
+
             # Log the token refresh
             self.env['dotykacka.sync.log'].create({
                 'config_id': config.id,
                 'log_type': 'auth',
                 'direction': 'outgoing',
-                'endpoint': self._get_token_url(),
-                'status_code': response.status_code,
+                'endpoint': oauth_request.url_path,
+                'status_code': oauth_request.status_code,
                 'request_data': json.dumps({
                     'grantType': payload['grantType'],
                     'clientId': payload['clientId'],
@@ -101,20 +132,54 @@ class DotykackaOAuth(models.TransientModel):
 
             return token_data
 
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             error_msg = _('OAuth token refresh failed: %s') % str(e)
+            _logger.error(error_msg)
 
             # Log the error
             self.env['dotykacka.sync.log'].create({
                 'config_id': config.id,
                 'log_type': 'auth',
                 'direction': 'outgoing',
-                'endpoint': self._get_token_url(),
-                'status_code': getattr(e.response, 'status_code', 0) if hasattr(e, 'response') else 0,
+                'endpoint': '/v2/signin/token',
+                'status_code': 0,
                 'error_message': str(e),
             })
 
             raise UserError(error_msg)
+
+    def _update_provider_token(self, access_token):
+        """
+        Update bearer token in api_manager provider.
+
+        Args:
+            access_token (str): New access token
+        """
+        # Find the API provider
+        provider = self.env['api_manager.provider'].search([
+            ('internal_reference', '=', 'DKSYNC_API'),
+        ], limit=1)
+
+        if provider:
+            # Update token in provider
+            provider.write({'token': access_token})
+
+            # Or update via request parameter for company-specific token
+            param = self.env['api_manager.request_parameter'].search([
+                ('provider', '=', provider.id),
+                ('key', '=', 'token'),
+                ('company_id', '=', self.config_id.company_id.id),
+            ])
+
+            if param:
+                param.write({'value': access_token})
+            else:
+                self.env['api_manager.request_parameter'].create({
+                    'provider': provider.id,
+                    'key': 'token',
+                    'value': access_token,
+                    'company_id': self.config_id.company_id.id,
+                })
 
     def ensure_valid_token(self):
         """
@@ -138,7 +203,7 @@ class DotykackaOAuth(models.TransientModel):
 
     def call_api(self, method, endpoint, data=None, params=None, retry=True):
         """
-        Make an authenticated API call to Dotykačka.
+        Make an authenticated API call to Dotykačka using api_manager.
 
         Args:
             method (str): HTTP method (GET, POST, PUT, PATCH, DELETE)
@@ -154,27 +219,39 @@ class DotykackaOAuth(models.TransientModel):
         config = self.config_id
 
         # Ensure we have a valid token
-        access_token = self.ensure_valid_token()
-
-        # Build full URL
-        url = f"{config.api_base_url}{endpoint}"
-
-        # Prepare headers
-        headers = {
-            'Authorization': f'Bearer {access_token}',
-            'Content-Type': 'application/json',
-        }
+        self.ensure_valid_token()
 
         try:
-            # Make the API call
-            response = requests.request(
-                method=method.upper(),
-                url=url,
-                headers=headers,
-                json=data,
-                params=params,
-                timeout=30,
+            # Find appropriate request in api_manager based on endpoint
+            api_request = self._find_request_by_endpoint(endpoint, method)
+
+            if not api_request:
+                # Fallback: use generic GET request if available
+                _logger.warning('No specific request found for endpoint %s, using generic approach', endpoint)
+                return self._call_api_generic(method, endpoint, data, params)
+
+            # Prepare URL parameters
+            url_params = self._extract_url_params(endpoint)
+
+            # Execute request
+            api_request.send_request(
+                params=url_params,
+                args=params or {},
+                data=data,
+                return_type='decoded'
             )
+
+            # Check success
+            if not api_request.success:
+                # Handle token expiration
+                if api_request.status_code == 401 and retry:
+                    _logger.info('Token expired, refreshing...')
+                    self.refresh_access_token()
+                    return self.call_api(method, endpoint, data, params, retry=False)
+
+                raise UserError(
+                    _('API call failed: %s - %s') % (api_request.status_code, api_request.error)
+                )
 
             # Log the request
             self.env['dotykacka.sync.log'].create({
@@ -182,47 +259,21 @@ class DotykackaOAuth(models.TransientModel):
                 'log_type': 'api',
                 'direction': 'outgoing',
                 'endpoint': endpoint,
-                'status_code': response.status_code,
+                'status_code': api_request.status_code,
                 'request_data': json.dumps(data) if data else None,
-                'response_data': response.text[:5000] if response.text else None,  # Limit response size
+                'response_data': str(api_request.decode_response())[:5000],
             })
 
-            # Handle token expiration (401) - retry once
-            if response.status_code == 401 and retry:
-                # Token might be expired, refresh and retry
-                self.refresh_access_token()
-                return self.call_api(method, endpoint, data, params, retry=False)
+            return api_request.decode_response()
 
-            response.raise_for_status()
-
-            # Parse JSON response
-            if response.content:
-                return response.json()
-            return {}
-
-        except requests.exceptions.HTTPError as e:
-            error_msg = _('API call failed: %s - %s') % (e.response.status_code, e.response.text)
-
-            # Log the error
-            self.env['dotykacka.sync.log'].create({
-                'config_id': config.id,
-                'log_type': 'api',
-                'direction': 'outgoing',
-                'endpoint': endpoint,
-                'status_code': e.response.status_code if hasattr(e, 'response') else 0,
-                'error_message': str(e),
-                'response_data': e.response.text if hasattr(e, 'response') else None,
-            })
-
-            raise UserError(error_msg)
-
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             error_msg = _('API request failed: %s') % str(e)
+            _logger.error(error_msg)
 
             # Log the error
             self.env['dotykacka.sync.log'].create({
                 'config_id': config.id,
-                'log_type': 'api',
+                'log_type': 'error',
                 'direction': 'outgoing',
                 'endpoint': endpoint,
                 'status_code': 0,
@@ -230,6 +281,113 @@ class DotykackaOAuth(models.TransientModel):
             })
 
             raise UserError(error_msg)
+
+    def _find_request_by_endpoint(self, endpoint, method):
+        """
+        Find api_manager request by endpoint pattern.
+
+        Args:
+            endpoint (str): Endpoint path
+            method (str): HTTP method
+
+        Returns:
+            api_manager.request: Request record or None
+        """
+        # Map endpoints to request names
+        endpoint_map = {
+            'customers': 'Get Customers',
+            'customers/': 'Get Customer',
+            'products': 'Get Products',
+            'products/': 'Get Product',
+            'orders': 'Get Orders',
+            'orders/': 'Get Order',
+            'branches': 'Get Branches',
+            'webhooks': 'Register Webhook',
+        }
+
+        # Find matching pattern
+        for pattern, request_name in endpoint_map.items():
+            if pattern in endpoint:
+                request = self.env['api_manager.request'].search([
+                    ('name', '=', request_name),
+                ], limit=1)
+                if request:
+                    return request
+
+        return None
+
+    def _extract_url_params(self, endpoint):
+        """
+        Extract URL parameters from endpoint.
+
+        Args:
+            endpoint (str): Endpoint with parameters like /v2/clouds/{cloud_id}/orders
+
+        Returns:
+            dict: URL parameters
+        """
+        params = {}
+
+        # Extract cloud_id
+        if '{cloud_id}' in endpoint or '/clouds/' in endpoint:
+            params['cloud_id'] = self.config_id.cloud_id
+
+        # Extract other IDs from endpoint
+        parts = endpoint.split('/')
+        for i, part in enumerate(parts):
+            if i > 0 and not part.startswith('{'):
+                prev_part = parts[i-1]
+                if prev_part in ['customers', 'products', 'orders', 'branches']:
+                    params[f'{prev_part[:-1]}_id'] = part
+
+        return params
+
+    def _call_api_generic(self, method, endpoint, data=None, params=None):
+        """
+        Generic API call when specific request is not found.
+        This is a fallback that creates a temporary request.
+
+        Args:
+            method (str): HTTP method
+            endpoint (str): Endpoint path
+            data (dict): Request data
+            params (dict): Query parameters
+
+        Returns:
+            dict: Response data
+        """
+        # Get API provider
+        provider = self.env['api_manager.provider'].search([
+            ('internal_reference', '=', 'DKSYNC_API'),
+        ], limit=1)
+
+        if not provider:
+            raise UserError(_('Dotykačka API provider not found'))
+
+        # Create temporary request
+        temp_request = self.env['api_manager.request'].create({
+            'name': f'Temp: {method} {endpoint}',
+            'provider': provider.id,
+            'method': method.lower(),
+            'url_path': endpoint,
+            'content_type': 'application/json',
+        })
+
+        # Execute request
+        url_params = self._extract_url_params(endpoint)
+        temp_request.send_request(
+            params=url_params,
+            args=params or {},
+            data=data,
+            return_type='decoded'
+        )
+
+        response = temp_request.decode_response()
+
+        # Delete temporary request
+        temp_request.unlink()
+
+        return response
 
     def call_api_paginated(self, method, endpoint, params=None, page_size=100):
         """
@@ -265,29 +423,3 @@ class DotykackaOAuth(models.TransientModel):
                 break
 
             params['offset'] += page_size
-
-    def handle_rate_limit(self, response):
-        """
-        Handle API rate limiting.
-
-        Dotykačka API has a limit of ~150 requests per 30 minutes.
-        """
-        # Check for rate limit headers
-        if 'X-RateLimit-Remaining' in response.headers:
-            remaining = int(response.headers['X-RateLimit-Remaining'])
-            if remaining < 10:
-                # Log warning when approaching rate limit
-                self.env['dotykacka.sync.log'].create({
-                    'config_id': self.config_id.id,
-                    'log_type': 'warning',
-                    'direction': 'outgoing',
-                    'endpoint': 'rate_limit_warning',
-                    'response_data': f'Rate limit remaining: {remaining}',
-                })
-
-        # If rate limited (429), raise user-friendly error
-        if response.status_code == 429:
-            retry_after = response.headers.get('Retry-After', '1800')  # Default 30 min
-            raise UserError(
-                _('Dotykačka API rate limit exceeded. Please try again in %s seconds.') % retry_after
-            )
