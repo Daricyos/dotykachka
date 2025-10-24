@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Main Menu -->
+        <menuitem id="menu_dotykacka_root"
+                  name="Dotykačka"
+                  sequence="100"
+                  web_icon="dotykacka_sync,static/description/icon.png"
+                  groups="group_dotykacka_user"/>
+
+        <!-- Configuration Menu -->
+        <menuitem id="menu_dotykacka_config"
+                  name="Configuration"
+                  parent="menu_dotykacka_root"
+                  sequence="10"
+                  groups="group_dotykacka_admin"/>
+
+        <menuitem id="menu_dotykacka_config_list"
+                  name="Configurations"
+                  parent="menu_dotykacka_config"
+                  action="action_dotykacka_config"
+                  sequence="10"/>
+
+        <!-- Logs Menu -->
+        <menuitem id="menu_dotykacka_logs"
+                  name="Logs"
+                  parent="menu_dotykacka_root"
+                  action="action_dotykacka_sync_log"
+                  sequence="20"/>
+
+    </data>
+</odoo>
