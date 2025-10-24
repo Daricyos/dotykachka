@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Dotykačka Configuration Form View -->
+        <record id="view_dotykacka_config_form" model="ir.ui.view">
+            <field name="name">dotykacka.config.form</field>
+            <field name="model">dotykacka.config</field>
+            <field name="arch" type="xml">
+                <form string="Dotykačka Configuration">
+                    <header>
+                        <button name="action_test_connection"
+                                string="Test Connection"
+                                type="object"
+                                class="oe_highlight"
+                                invisible="status == 'draft'"/>
+                        <button name="action_register_webhooks"
+                                string="Register Webhooks"
+                                type="object"
+                                invisible="status != 'active'"/>
+                        <button name="action_sync_now"
+                                string="Sync Now"
+                                type="object"
+                                class="oe_highlight"
+                                invisible="status != 'active'"/>
+                        <field name="status" widget="statusbar" statusbar_visible="draft,active"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="%(action_dotykacka_sync_log)d"
+                                    type="action"
+                                    class="oe_stat_button"
+                                    icon="fa-list">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">Sync Logs</span>
+                                </div>
+                            </button>
+                        </div>
+                        <widget name="web_ribbon" title="Inactive" bg_color="bg-danger" invisible="active"/>
+                        <widget name="web_ribbon" title="Error" bg_color="bg-warning" invisible="status != 'error'"/>
+
+                        <group>
+                            <group string="Basic Information">
+                                <field name="active"/>
+                                <field name="cloud_name" placeholder="e.g., My Restaurant"/>
+                                <field name="cloud_id" placeholder="Your Cloud ID from Dotykačka"/>
+                                <field name="branch_id" placeholder="Optional Branch ID"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                            </group>
+                            <group string="Statistics">
+                                <field name="total_synced_orders"/>
+                                <field name="total_synced_customers"/>
+                                <field name="total_synced_products"/>
+                                <field name="last_sync_date"/>
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page string="OAuth Configuration" name="oauth">
+                                <group>
+                                    <group string="Credentials">
+                                        <field name="client_id" password="True"/>
+                                        <field name="client_secret" password="True"/>
+                                        <field name="redirect_uri"/>
+                                    </group>
+                                    <group string="Token Info">
+                                        <field name="access_token" password="True"/>
+                                        <field name="refresh_token" password="True"/>
+                                        <field name="token_expires_at"/>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <page string="API Settings" name="api">
+                                <group>
+                                    <group string="API Configuration">
+                                        <field name="api_base_url"/>
+                                        <field name="api_version"/>
+                                    </group>
+                                    <group string="Webhook Configuration">
+                                        <field name="webhook_enabled"/>
+                                        <field name="webhook_url" widget="url" readonly="1"/>
+                                        <field name="webhook_secret" password="True"/>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <page string="Sync Settings" name="sync">
+                                <group>
+                                    <group string="Entity Synchronization">
+                                        <field name="sync_customers"/>
+                                        <field name="sync_products"/>
+                                        <field name="sync_orders"/>
+                                    </group>
+                                    <group string="Order Filters">
+                                        <field name="order_status_filter"/>
+                                        <field name="sync_interval"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group string="Invoice Settings">
+                                        <field name="auto_create_invoice"/>
+                                        <field name="auto_validate_invoice" invisible="not auto_create_invoice"/>
+                                    </group>
+                                    <group string="Payment Settings">
+                                        <field name="auto_reconcile_payments"/>
+                                    </group>
+                                </group>
+                            </page>
+
+                            <page string="Payment Methods" name="payment_methods">
+                                <field name="payment_method_ids">
+                                    <tree editable="bottom">
+                                        <field name="dotykacka_method_id"/>
+                                        <field name="dotykacka_method_name"/>
+                                        <field name="dotykacka_method_type"/>
+                                        <field name="journal_id"/>
+                                        <field name="active"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+
+                        <group string="Error Information" invisible="not error_message">
+                            <field name="error_message" readonly="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Dotykačka Configuration Tree View -->
+        <record id="view_dotykacka_config_tree" model="ir.ui.view">
+            <field name="name">dotykacka.config.tree</field>
+            <field name="model">dotykacka.config</field>
+            <field name="arch" type="xml">
+                <tree string="Dotykačka Configurations">
+                    <field name="cloud_name"/>
+                    <field name="cloud_id"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="status" decoration-success="status == 'active'" decoration-danger="status == 'error'"/>
+                    <field name="active" widget="boolean_toggle"/>
+                    <field name="last_sync_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Dotykačka Configuration Action -->
+        <record id="action_dotykacka_config" model="ir.actions.act_window">
+            <field name="name">Dotykačka Configurations</field>
+            <field name="res_model">dotykacka.config</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a Dotykačka Configuration
+                </p>
+                <p>
+                    Configure your Dotykačka POS integration to automatically sync
+                    customers, products, orders, invoices, and payments to Odoo.
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>
