@@ -368,7 +368,7 @@ class DotykackaOAuth(models.TransientModel):
         temp_request = self.env['api_manager.request'].create({
             'name': f'Temp: {method} {endpoint}',
             'provider': provider.id,
-            'method': method.lower(),
+            'method': method.upper(),
             'url_path': endpoint,
             'content_type': 'application/json',
         })
