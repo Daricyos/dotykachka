@@ -434,8 +434,8 @@ class APIRequest(models.Model):
         Send request and return response.
         """
 
-        self.log_request(LOG_ORIGIN)
         request_data = self.get_request_data(**kwargs)
+        self.log_request(LOG_ORIGIN, request_data)
 
         # Посмотреть какие данные собрали для запроса
         print("=== REQUEST DATA ===")
@@ -467,6 +467,7 @@ class APIRequest(models.Model):
 
             self._set_status_code()
             self.success = self.status_code // 200 == 1
+            self.log_response(LOG_ORIGIN)
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout) as error:
             print("HTTP/Timeout error:", error)
             result = self._retry_request(**kwargs)
@@ -546,19 +547,52 @@ class APIRequest(models.Model):
             )
         return {}
 
-    def log_request(self, origin=None):
+    def log_request(self, origin=None, request_data=None):
         """Log outgoing requests to api_manager.logger."""
-        state = self._get_request_state()
+        if request_data is None:
+            return
+
+        log_data = {
+            "url": request_data.get('url'),
+            "method": request_data.get('method'),
+            "headers": request_data.get('headers', {}),
+            "cookies": request_data.get('cookies'),
+            "data": request_data.get('data'),
+            "json": request_data.get('json'),
+        }
+
         self.env['api_manager.logger'].with_user(SUPERUSER_ID).sudo().create(
             {
                 'created_at': datetime.now(),
                 'origin': origin or LOG_ORIGIN,
                 'direction': "outgoing",
-                'data': {
-                    "headers": state['headers'],
-                    "cookies": state['cookies'],
-                    "data": state['data'],
-                },
+                'data': json.dumps(log_data, ensure_ascii=False, default=str),
+            }
+        )
+
+    def log_response(self, origin=None):
+        """Log API response to api_manager.logger."""
+        if not self.response:
+            return
+
+        try:
+            response_json = self.response.json()
+        except (json.decoder.JSONDecodeError, ValueError):
+            response_json = None
+
+        log_data = {
+            "status_code": self.response.status_code,
+            "headers": dict(self.response.headers),
+            "text": self.response.text[:5000],  # Limit to 5000 chars
+            "json": response_json,
+        }
+
+        self.env['api_manager.logger'].with_user(SUPERUSER_ID).sudo().create(
+            {
+                'created_at': datetime.now(),
+                'origin': origin or LOG_ORIGIN,
+                'direction': "incoming",
+                'data': json.dumps(log_data, ensure_ascii=False, default=str),
             }
         )
 
