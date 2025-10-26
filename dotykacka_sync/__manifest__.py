@@ -52,6 +52,9 @@ Technical:
         'data/api_requests_data.xml',
         'data/cron_jobs.xml',
 
+        # Templates
+        'views/templates/oauth_templates.xml',
+
         # Views
         'views/dotykacka_config_view.xml',
         'views/dotykacka_oauth_view.xml',

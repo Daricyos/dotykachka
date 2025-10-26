@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root Menu -->
+    <menuitem id="menu_dotykacka_root"
+              name="Dotykačka"
+              web_icon="dotykacka_sync,static/description/icon.png"
+              sequence="50"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_dotykacka_config"
+              name="Configuration"
+              parent="menu_dotykacka_root"
+              action="action_dotykacka_config"
+              sequence="10"/>
+
+    <!-- Payment Mappings Menu -->
+    <menuitem id="menu_dotykacka_payment_mapping"
+              name="Payment Mappings"
+              parent="menu_dotykacka_root"
+              action="action_dotykacka_payment_mapping"
+              sequence="20"/>
+
+    <!-- Sync Logs Menu -->
+    <menuitem id="menu_dotykacka_sync_log"
+              name="Sync Logs"
+              parent="menu_dotykacka_root"
+              action="action_dotykacka_sync_log"
+              sequence="30"/>
+
+    <!-- Settings Submenu -->
+    <menuitem id="menu_dotykacka_settings"
+              name="Settings"
+              parent="menu_dotykacka_root"
+              sequence="100"/>
+
+    <!-- OAuth Tokens in Settings -->
+    <menuitem id="menu_dotykacka_oauth"
+              name="OAuth Tokens"
+              parent="menu_dotykacka_settings"
+              action="base.act_res_model_dotykacka_oauth"
+              sequence="10"/>
+
+</odoo>

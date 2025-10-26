@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Form View -->
+    <record id="view_dotykacka_payment_mapping_form" model="ir.ui.view">
+        <field name="name">dotykacka.payment.mapping.form</field>
+        <field name="model">dotykacka.payment.mapping</field>
+        <field name="arch" type="xml">
+            <form string="Payment Method Mapping">
+                <header>
+                    <field name="active" widget="boolean_toggle"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_payments" type="object" class="oe_stat_button" icon="fa-money">
+                            <field name="payment_count" widget="statinfo" string="Payments"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="dotykacka_payment_method" required="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Dotykačka">
+                            <field name="config_id" required="1" options="{'no_create': True}"/>
+                            <field name="payment_method_name" placeholder="Custom name (optional)"/>
+                            <field name="dotykacka_payment_id" placeholder="External payment ID (optional)"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group string="Odoo">
+                            <field name="company_id" readonly="1"/>
+                            <field name="journal_id" required="1" options="{'no_create': True}"/>
+                            <field name="payment_method_line_id" options="{'no_create': True}"/>
+                            <field name="is_default"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_dotykacka_payment_mapping_tree" model="ir.ui.view">
+        <field name="name">dotykacka.payment.mapping.tree</field>
+        <field name="model">dotykacka.payment.mapping</field>
+        <field name="arch" type="xml">
+            <tree string="Payment Method Mappings" default_order="sequence,dotykacka_payment_method">
+                <field name="sequence" widget="handle"/>
+                <field name="dotykacka_payment_method"/>
+                <field name="payment_method_name"/>
+                <field name="journal_id"/>
+                <field name="is_default"/>
+                <field name="payment_count"/>
+                <field name="config_id"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_dotykacka_payment_mapping_search" model="ir.ui.view">
+        <field name="name">dotykacka.payment.mapping.search</field>
+        <field name="model">dotykacka.payment.mapping</field>
+        <field name="arch" type="xml">
+            <search string="Payment Method Mappings">
+                <field name="dotykacka_payment_method"/>
+                <field name="journal_id"/>
+                <field name="config_id"/>
+                <filter name="default" string="Default" domain="[('is_default', '=', True)]"/>
+                <filter name="active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_config" string="Configuration" context="{'group_by': 'config_id'}"/>
+                    <filter name="group_journal" string="Journal" context="{'group_by': 'journal_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_dotykacka_payment_mapping" model="ir.actions.act_window">
+        <field name="name">Payment Method Mappings</field>
+        <field name="res_model">dotykacka.payment.mapping</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a Payment Method Mapping
+            </p>
+            <p>
+                Map Dotykačka payment methods to Odoo payment journals.
+            </p>
+        </field>
+    </record>
+
+</odoo>

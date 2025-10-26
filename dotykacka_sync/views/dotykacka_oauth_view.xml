@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Form View -->
+    <record id="view_dotykacka_oauth_form" model="ir.ui.view">
+        <field name="name">dotykacka.oauth.form</field>
+        <field name="model">dotykacka.oauth</field>
+        <field name="arch" type="xml">
+            <form string="OAuth Token" create="false" delete="false">
+                <header>
+                    <button name="action_refresh" type="object" string="Refresh Token"
+                            class="oe_highlight" invisible="not is_valid or not refresh_token"/>
+                    <button name="action_revoke" type="object" string="Revoke Token"
+                            invisible="not active"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="config_id" readonly="1"/>
+                        </h1>
+                        <div class="o_row">
+                            <field name="is_valid" invisible="1"/>
+                            <span class="badge badge-success" invisible="not is_valid">
+                                <i class="fa fa-check"/> Valid
+                            </span>
+                            <span class="badge badge-danger" invisible="is_valid">
+                                <i class="fa fa-times"/> Expired
+                            </span>
+                        </div>
+                    </div>
+                    <group>
+                        <group string="Token Information">
+                            <field name="token_type" readonly="1"/>
+                            <field name="scope" readonly="1"/>
+                            <field name="obtained_at" readonly="1"/>
+                            <field name="expires_at" readonly="1"/>
+                            <field name="is_valid" readonly="1"/>
+                        </group>
+                        <group string="Refresh Information">
+                            <field name="refresh_token" readonly="1" password="True"/>
+                            <field name="last_refresh_at" readonly="1"/>
+                            <field name="refresh_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="access_token" readonly="1" password="True"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_dotykacka_oauth_tree" model="ir.ui.view">
+        <field name="name">dotykacka.oauth.tree</field>
+        <field name="model">dotykacka.oauth</field>
+        <field name="arch" type="xml">
+            <tree string="OAuth Tokens" create="false">
+                <field name="config_id"/>
+                <field name="obtained_at"/>
+                <field name="expires_at"/>
+                <field name="is_valid"/>
+                <field name="refresh_count"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+</odoo>

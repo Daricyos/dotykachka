@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Get Cloud Info -->
+        <record id="api_request_get_cloud" model="api_manager.request">
+            <field name="name">get_cloud</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Customers -->
+        <record id="api_request_get_customers" model="api_manager.request">
+            <field name="name">get_customers</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/customers</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <record id="api_request_get_customer" model="api_manager.request">
+            <field name="name">get_customer</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/customers/{customerId}</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Products -->
+        <record id="api_request_get_products" model="api_manager.request">
+            <field name="name">get_products</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/products</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <record id="api_request_get_product" model="api_manager.request">
+            <field name="name">get_product</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/products/{productId}</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Orders/Receipts -->
+        <record id="api_request_get_orders" model="api_manager.request">
+            <field name="name">get_orders</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/receipts</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <record id="api_request_get_order" model="api_manager.request">
+            <field name="name">get_order</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/receipts/{orderId}</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Webhooks -->
+        <record id="api_request_get_webhooks" model="api_manager.request">
+            <field name="name">get_webhooks</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/webhooks</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <record id="api_request_create_webhook" model="api_manager.request">
+            <field name="name">create_webhook</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/webhooks</field>
+            <field name="method">POST</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <record id="api_request_delete_webhook" model="api_manager.request">
+            <field name="name">delete_webhook</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/webhooks/{webhookId}</field>
+            <field name="method">DELETE</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Payment Methods -->
+        <record id="api_request_get_payment_methods" model="api_manager.request">
+            <field name="name">get_payment_methods</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/payment-methods</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+        <!-- Employees -->
+        <record id="api_request_get_employees" model="api_manager.request">
+            <field name="name">get_employees</field>
+            <field name="provider" ref="dotykacka_api_provider_template"/>
+            <field name="url_path">/v2/clouds/{cloudId}/employees</field>
+            <field name="method">GET</field>
+            <field name="content_type">application/json</field>
+        </record>
+
+    </data>
+</odoo>

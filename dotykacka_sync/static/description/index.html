@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Dotykačka Sync</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #7C7BAD;
+            border-bottom: 3px solid #7C7BAD;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #875A7B;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #666;
+        }
+        .features {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .features ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .features li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dotykačka Sync for Odoo 18</h1>
+
+    <p>
+        <strong>One-way integration from Dotykačka POS to Odoo 18</strong>
+    </p>
+
+    <div class="features">
+        <h2>Key Features</h2>
+        <ul>
+            <li>Real-time webhook-driven synchronization</li>
+            <li>OAuth 2.0 authentication with automatic token refresh</li>
+            <li>Syncs customers, products, orders, invoices, and payments</li>
+            <li>Multiple payment methods support (Cash, Card, Wolt, Glovo, etc.)</li>
+            <li>Cron-based fallback for missed events</li>
+            <li>Comprehensive sync logging and error tracking</li>
+            <li>API rate limiting (~150 requests/30 min)</li>
+            <li>Order status filtering (on-site vs takeaway)</li>
+        </ul>
+    </div>
+
+    <h2>Business Rules</h2>
+    <ul>
+        <li>Only imports orders with status <strong>"on site"</strong></li>
+        <li>Ignores orders with status <strong>"takeaway"</strong> (handled in KeyCRM)</li>
+        <li>Deleted orders trigger automatic cancellation of related orders, invoices, and payments</li>
+    </ul>
+
+    <h2>Installation</h2>
+    <ol>
+        <li>Install the <code>api_manager</code> module (dependency)</li>
+        <li>Install this module: <code>dotykacka_sync</code></li>
+        <li>Go to <strong>Dotykačka → Configuration</strong></li>
+        <li>Create a new configuration with your Dotykačka credentials</li>
+        <li>Click <strong>"Authorize"</strong> to connect with OAuth</li>
+        <li>Register webhook for real-time synchronization</li>
+    </ol>
+
+    <h2>Configuration</h2>
+
+    <h3>1. OAuth Setup</h3>
+    <p>
+        You'll need OAuth credentials from Dotykačka:
+    </p>
+    <ul>
+        <li><strong>Client ID</strong>: Your Dotykačka OAuth client ID</li>
+        <li><strong>Client Secret</strong>: Your Dotykačka OAuth client secret</li>
+        <li><strong>Cloud ID</strong>: Your Dotykačka cloud identifier</li>
+    </ul>
+
+    <h3>2. Payment Method Mapping</h3>
+    <p>
+        Map Dotykačka payment methods to Odoo payment journals:
+    </p>
+    <ul>
+        <li>Go to <strong>Dotykačka → Payment Mappings</strong></li>
+        <li>Create mappings for each payment method (Cash, Card, Wolt, etc.)</li>
+        <li>Set one mapping as <strong>default</strong> for unmapped methods</li>
+    </ul>
+
+    <h3>3. Sync Settings</h3>
+    <p>
+        Configure what to synchronize:
+    </p>
+    <ul>
+        <li><strong>Sync Customers</strong>: Enable/disable customer sync</li>
+        <li><strong>Sync Products</strong>: Enable/disable product sync</li>
+        <li><strong>Sync Orders</strong>: Enable/disable order sync</li>
+        <li><strong>Order Status Filter</strong>: Choose which orders to import</li>
+    </ul>
+
+    <div class="info">
+        <h3>Webhook vs Cron</h3>
+        <p>
+            The module uses <strong>webhooks</strong> for real-time synchronization.
+            If a webhook event is missed, the <strong>cron job</strong> (runs every 15 minutes)
+            will catch up and sync any missing data.
+        </p>
+    </div>
+
+    <h2>How It Works</h2>
+
+    <h3>Synchronization Flow</h3>
+    <ol>
+        <li>Order created/updated in Dotykačka</li>
+        <li>Webhook event sent to Odoo</li>
+        <li>Module processes the event:
+            <ul>
+                <li>Creates/updates customer (if needed)</li>
+                <li>Creates/updates products (if needed)</li>
+                <li>Creates Sale Order</li>
+                <li>Generates Invoice</li>
+                <li>Creates Payments (for each payment method)</li>
+                <li>Reconciles payments with invoice</li>
+            </ul>
+        </li>
+        <li>All operations logged in Sync Logs</li>
+    </ol>
+
+    <h3>Deletion Handling</h3>
+    <p>
+        When an order is deleted in Dotykačka:
+    </p>
+    <ul>
+        <li>Sale Order is cancelled</li>
+        <li>Invoice is reversed (credit note created)</li>
+        <li>Payments are cancelled (if not reconciled)</li>
+    </ul>
+
+    <h2>API Endpoints</h2>
+    <table border="1" cellpadding="10" style="border-collapse: collapse; width: 100%;">
+        <thead>
+            <tr style="background: #f8f9fa;">
+                <th>Endpoint</th>
+                <th>Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>/dotykacka/webhook/&lt;cloud_id&gt;</code></td>
+                <td>Receives webhook events from Dotykačka</td>
+            </tr>
+            <tr>
+                <td><code>/dotykacka/oauth/callback</code></td>
+                <td>OAuth callback for authorization</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Monitoring & Logs</h2>
+    <p>
+        View synchronization logs at <strong>Dotykačka → Sync Logs</strong>:
+    </p>
+    <ul>
+        <li>Filter by type (customer, product, order, invoice, payment)</li>
+        <li>Filter by status (success, warning, error)</li>
+        <li>View detailed error messages and tracebacks</li>
+        <li>Retry failed synchronizations</li>
+    </ul>
+
+    <div class="warning">
+        <h3>Important Notes</h3>
+        <ul style="margin: 0;">
+            <li>This is a <strong>one-way</strong> integration (Dotykačka → Odoo only)</li>
+            <li>Changes made in Odoo will <strong>not</strong> sync back to Dotykačka</li>
+            <li>Respect API rate limits (~150 requests per 30 minutes)</li>
+            <li>OAuth tokens are automatically refreshed every 6 hours</li>
+        </ul>
+    </div>
+
+    <h2>Troubleshooting</h2>
+
+    <h3>Common Issues</h3>
+    <dl>
+        <dt><strong>Authentication failed</strong></dt>
+        <dd>Check your Client ID and Client Secret. Make sure they match your Dotykačka app settings.</dd>
+
+        <dt><strong>Webhook not working</strong></dt>
+        <dd>Ensure your Odoo instance is accessible from the internet. Check that the webhook is registered in Dotykačka.</dd>
+
+        <dt><strong>Payment mapping errors</strong></dt>
+        <dd>Create payment mappings for all payment methods used in Dotykačka. Set a default mapping as fallback.</dd>
+
+        <dt><strong>Rate limit exceeded</strong></dt>
+        <dd>The module automatically handles rate limiting. If you see errors, reduce the sync frequency or increase the rate limit period.</dd>
+    </dl>
+
+    <h2>Support</h2>
+    <p>
+        For issues and questions, please contact your system administrator or module developer.
+    </p>
+
+    <hr>
+
+    <p style="text-align: center; color: #999; margin-top: 40px;">
+        <small>Dotykačka Sync v18.0.1.0.0 for Odoo 18</small>
+    </p>
+</body>
+</html>

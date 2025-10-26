@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dotykacka_config_user,dotykacka.config user,model_dotykacka_config,group_dotykacka_user,1,0,0,0
+access_dotykacka_config_manager,dotykacka.config manager,model_dotykacka_config,group_dotykacka_manager,1,1,1,1
+access_dotykacka_oauth_user,dotykacka.oauth user,model_dotykacka_oauth,group_dotykacka_user,1,0,0,0
+access_dotykacka_oauth_manager,dotykacka.oauth manager,model_dotykacka_oauth,group_dotykacka_manager,1,1,1,1
+access_dotykacka_sync_log_user,dotykacka.sync.log user,model_dotykacka_sync_log,group_dotykacka_user,1,0,0,0
+access_dotykacka_sync_log_manager,dotykacka.sync.log manager,model_dotykacka_sync_log,group_dotykacka_manager,1,1,1,1
+access_dotykacka_order_mapping_user,dotykacka.order.mapping user,model_dotykacka_order_mapping,group_dotykacka_user,1,0,0,0
+access_dotykacka_order_mapping_manager,dotykacka.order.mapping manager,model_dotykacka_order_mapping,group_dotykacka_manager,1,1,1,1
+access_dotykacka_payment_mapping_user,dotykacka.payment.mapping user,model_dotykacka_payment_mapping,group_dotykacka_user,1,0,0,0
+access_dotykacka_payment_mapping_manager,dotykacka.payment.mapping manager,model_dotykacka_payment_mapping,group_dotykacka_manager,1,1,1,1
+access_dotykacka_api,dotykacka.api all,model_dotykacka_api,base.group_user,1,0,0,0
+access_dotykacka_oauth_service,dotykacka.oauth.service all,model_dotykacka_oauth_service,base.group_user,1,0,0,0
+access_dotykacka_rate_limiter,dotykacka.rate.limiter all,model_dotykacka_rate_limiter,base.group_user,1,0,0,0
+access_dotykacka_sync_customer,dotykacka.sync.customer all,model_dotykacka_sync_customer,base.group_user,1,0,0,0
+access_dotykacka_sync_product,dotykacka.sync.product all,model_dotykacka_sync_product,base.group_user,1,0,0,0
+access_dotykacka_sync_order,dotykacka.sync.order all,model_dotykacka_sync_order,base.group_user,1,0,0,0

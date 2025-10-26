@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Security Groups -->
+        <record id="group_dotykacka_user" model="res.groups">
+            <field name="name">Dotykačka User</field>
+            <field name="category_id" ref="base.module_category_sales_point_of_sale"/>
+            <field name="comment">Can view Dotykačka sync data and logs</field>
+        </record>
+
+        <record id="group_dotykacka_manager" model="res.groups">
+            <field name="name">Dotykačka Manager</field>
+            <field name="category_id" ref="base.module_category_sales_point_of_sale"/>
+            <field name="implied_ids" eval="[(4, ref('group_dotykacka_user'))]"/>
+            <field name="comment">Can configure Dotykačka integration and trigger manual syncs</field>
+        </record>
+
+        <!-- Rules for dotykacka.config -->
+        <record id="dotykacka_config_user_rule" model="ir.rule">
+            <field name="name">Dotykačka Config: User - Own Company</field>
+            <field name="model_id" ref="model_dotykacka_config"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_dotykacka_user'))]"/>
+        </record>
+
+        <record id="dotykacka_config_manager_rule" model="ir.rule">
+            <field name="name">Dotykačka Config: Manager - Own Company</field>
+            <field name="model_id" ref="model_dotykacka_config"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_dotykacka_manager'))]"/>
+        </record>
+
+        <!-- Rules for dotykacka.oauth -->
+        <record id="dotykacka_oauth_user_rule" model="ir.rule">
+            <field name="name">Dotykačka OAuth: User - Own Company</field>
+            <field name="model_id" ref="model_dotykacka_oauth"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_dotykacka_user'))]"/>
+        </record>
+
+        <!-- Rules for dotykacka.sync.log -->
+        <record id="dotykacka_sync_log_user_rule" model="ir.rule">
+            <field name="name">Dotykačka Sync Log: User - Own Company</field>
+            <field name="model_id" ref="model_dotykacka_sync_log"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_dotykacka_user'))]"/>
+        </record>
+
+        <!-- Rules for dotykacka.order.mapping -->
+        <record id="dotykacka_order_mapping_user_rule" model="ir.rule">
+            <field name="name">Dotykačka Order Mapping: User - Own Company</field>
+            <field name="model_id" ref="model_dotykacka_order_mapping"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_dotykacka_user'))]"/>
+        </record>
+
+        <!-- Rules for dotykacka.payment.mapping -->
+        <record id="dotykacka_payment_mapping_user_rule" model="ir.rule">
+            <field name="name">Dotykačka Payment Mapping: User - Own Company</field>
+            <field name="model_id" ref="model_dotykacka_payment_mapping"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('group_dotykacka_user'))]"/>
+        </record>
+
+    </data>
+</odoo>

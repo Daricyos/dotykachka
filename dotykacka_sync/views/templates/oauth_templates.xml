@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- OAuth Success Template -->
+    <template id="oauth_success" name="OAuth Authorization Success">
+        <t t-call="web.layout">
+            <div class="container mt-5">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <div class="alert alert-success text-center">
+                            <h1><i class="fa fa-check-circle"/> Authorization Successful!</h1>
+                            <p class="lead">Your Dotykačka account has been successfully connected.</p>
+                            <hr/>
+                            <p>
+                                Configuration: <strong><t t-esc="config.cloud_id"/></strong>
+                            </p>
+                            <p class="mt-4">
+                                <a href="/web" class="btn btn-primary">Back to Odoo</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- OAuth Error Template -->
+    <template id="oauth_error" name="OAuth Authorization Error">
+        <t t-call="web.layout">
+            <div class="container mt-5">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <div class="alert alert-danger text-center">
+                            <h1><i class="fa fa-exclamation-triangle"/> Authorization Failed</h1>
+                            <p class="lead">An error occurred during authorization.</p>
+                            <hr/>
+                            <p>
+                                <strong>Error:</strong> <t t-esc="error"/>
+                            </p>
+                            <p t-if="description">
+                                <strong>Description:</strong> <t t-esc="description"/>
+                            </p>
+                            <p class="mt-4">
+                                <a href="/web" class="btn btn-primary">Back to Odoo</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

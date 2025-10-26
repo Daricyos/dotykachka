@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Form View -->
+    <record id="view_dotykacka_sync_log_form" model="ir.ui.view">
+        <field name="name">dotykacka.sync.log.form</field>
+        <field name="model">dotykacka.sync.log</field>
+        <field name="arch" type="xml">
+            <form string="Sync Log" create="false" edit="false" delete="false">
+                <header>
+                    <button name="action_view_record" type="object" string="View Record"
+                            invisible="not odoo_id or not odoo_model"/>
+                    <button name="action_retry_sync" type="object" string="Retry"
+                            class="oe_highlight" invisible="sync_status != 'error'"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="sync_type" readonly="1"/>
+                            <span> - </span>
+                            <field name="sync_action" readonly="1"/>
+                        </h1>
+                        <div class="o_row">
+                            <field name="sync_status" readonly="1" widget="badge"
+                                   decoration-success="sync_status == 'success'"
+                                   decoration-warning="sync_status == 'warning'"
+                                   decoration-danger="sync_status == 'error'"/>
+                        </div>
+                    </div>
+                    <group>
+                        <group string="Sync Information">
+                            <field name="config_id" readonly="1"/>
+                            <field name="create_date" readonly="1"/>
+                            <field name="triggered_by" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                        </group>
+                        <group string="References">
+                            <field name="dotykacka_id" readonly="1"/>
+                            <field name="dotykacka_type" readonly="1"/>
+                            <field name="odoo_model" readonly="1"/>
+                            <field name="odoo_id" readonly="1"/>
+                            <field name="odoo_record_name" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Performance">
+                            <field name="duration_ms" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Message" name="message">
+                            <field name="message" readonly="1" nolabel="1"/>
+                        </page>
+                        <page string="Error" name="error" invisible="sync_status != 'error'">
+                            <group>
+                                <field name="error_message" readonly="1" nolabel="1"/>
+                            </group>
+                            <group string="Traceback">
+                                <field name="error_traceback" readonly="1" nolabel="1" widget="text"/>
+                            </group>
+                        </page>
+                        <page string="Request Data" name="request_data" invisible="not request_data">
+                            <field name="request_data" readonly="1" nolabel="1" widget="text"/>
+                        </page>
+                        <page string="Response Data" name="response_data" invisible="not response_data">
+                            <field name="response_data" readonly="1" nolabel="1" widget="text"/>
+                        </page>
+                        <page string="Webhook Payload" name="webhook_payload" invisible="not webhook_payload">
+                            <field name="webhook_payload" readonly="1" nolabel="1" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_dotykacka_sync_log_tree" model="ir.ui.view">
+        <field name="name">dotykacka.sync.log.tree</field>
+        <field name="model">dotykacka.sync.log</field>
+        <field name="arch" type="xml">
+            <tree string="Sync Logs" create="false" edit="false" delete="false"
+                  decoration-success="sync_status == 'success'"
+                  decoration-warning="sync_status == 'warning'"
+                  decoration-danger="sync_status == 'error'">
+                <field name="create_date"/>
+                <field name="sync_type"/>
+                <field name="sync_action"/>
+                <field name="sync_status" widget="badge"/>
+                <field name="dotykacka_id"/>
+                <field name="odoo_record_name"/>
+                <field name="message"/>
+                <field name="config_id"/>
+                <field name="triggered_by"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_dotykacka_sync_log_search" model="ir.ui.view">
+        <field name="name">dotykacka.sync.log.search</field>
+        <field name="model">dotykacka.sync.log</field>
+        <field name="arch" type="xml">
+            <search string="Sync Logs">
+                <field name="sync_type"/>
+                <field name="dotykacka_id"/>
+                <field name="odoo_record_name"/>
+                <field name="message"/>
+                <filter name="success" string="Success" domain="[('sync_status', '=', 'success')]"/>
+                <filter name="warning" string="Warning" domain="[('sync_status', '=', 'warning')]"/>
+                <filter name="error" string="Error" domain="[('sync_status', '=', 'error')]"/>
+                <separator/>
+                <filter name="today" string="Today" domain="[('create_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="this_week" string="This Week" domain="[('create_date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="webhook" string="Webhook" domain="[('triggered_by', '=', 'webhook')]"/>
+                <filter name="cron" string="Cron" domain="[('triggered_by', '=', 'cron')]"/>
+                <filter name="manual" string="Manual" domain="[('triggered_by', '=', 'manual')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_type" string="Type" context="{'group_by': 'sync_type'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'sync_status'}"/>
+                    <filter name="group_config" string="Configuration" context="{'group_by': 'config_id'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_dotykacka_sync_log" model="ir.actions.act_window">
+        <field name="name">Sync Logs</field>
+        <field name="res_model">dotykacka.sync.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_this_week': 1}</field>
+    </record>
+
+</odoo>

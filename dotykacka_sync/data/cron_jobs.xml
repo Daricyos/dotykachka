@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Sync Customers (Daily) -->
+        <record id="ir_cron_sync_customers" model="ir.cron">
+            <field name="name">Dotykačka: Sync Customers</field>
+            <field name="model_id" ref="model_dotykacka_config"/>
+            <field name="state">code</field>
+            <field name="code">
+configs = model.search([('active', '=', True), ('sync_customers', '=', True)])
+for config in configs:
+    try:
+        env['dotykacka.sync.customer'].sync_customers(config, limit=100)
+    except Exception as e:
+        log(f'Error syncing customers for {config.cloud_id}: {str(e)}')
+            </field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+        </record>
+
+        <!-- Sync Products (Daily) -->
+        <record id="ir_cron_sync_products" model="ir.cron">
+            <field name="name">Dotykačka: Sync Products</field>
+            <field name="model_id" ref="model_dotykacka_config"/>
+            <field name="state">code</field>
+            <field name="code">
+configs = model.search([('active', '=', True), ('sync_products', '=', True)])
+for config in configs:
+    try:
+        env['dotykacka.sync.product'].sync_products(config, limit=100)
+    except Exception as e:
+        log(f'Error syncing products for {config.cloud_id}: {str(e)}')
+            </field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+        </record>
+
+        <!-- Sync Orders (Every 15 minutes - Fallback) -->
+        <record id="ir_cron_sync_orders" model="ir.cron">
+            <field name="name">Dotykačka: Sync Orders (Fallback)</field>
+            <field name="model_id" ref="model_dotykacka_config"/>
+            <field name="state">code</field>
+            <field name="code">
+from datetime import datetime, timedelta
+
+configs = model.search([('active', '=', True), ('sync_orders', '=', True)])
+for config in configs:
+    try:
+        # Sync orders from last 24 hours as fallback
+        date_from = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        date_to = datetime.now().strftime('%Y-%m-%d')
+        env['dotykacka.sync.order'].sync_orders(
+            config,
+            limit=50,
+            date_from=date_from,
+            date_to=date_to
+        )
+    except Exception as e:
+        log(f'Error syncing orders for {config.cloud_id}: {str(e)}')
+            </field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+        </record>
+
+        <!-- Cleanup Old Logs (Weekly) -->
+        <record id="ir_cron_cleanup_logs" model="ir.cron">
+            <field name="name">Dotykačka: Cleanup Old Logs</field>
+            <field name="model_id" ref="model_dotykacka_sync_log"/>
+            <field name="state">code</field>
+            <field name="code">
+try:
+    model.cleanup_old_logs(days=90)
+except Exception as e:
+    log(f'Error cleaning up logs: {str(e)}')
+            </field>
+            <field name="interval_number">7</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+        </record>
+
+        <!-- Cleanup Old OAuth Tokens (Monthly) -->
+        <record id="ir_cron_cleanup_tokens" model="ir.cron">
+            <field name="name">Dotykačka: Cleanup Old OAuth Tokens</field>
+            <field name="model_id" ref="model_dotykacka_oauth"/>
+            <field name="state">code</field>
+            <field name="code">
+try:
+    model.cleanup_old_tokens()
+except Exception as e:
+    log(f'Error cleaning up tokens: {str(e)}')
+            </field>
+            <field name="interval_number">30</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+        </record>
+
+        <!-- Auto-refresh OAuth Tokens (Every 6 hours) -->
+        <record id="ir_cron_refresh_tokens" model="ir.cron">
+            <field name="name">Dotykačka: Auto-refresh OAuth Tokens</field>
+            <field name="model_id" ref="model_dotykacka_oauth"/>
+            <field name="state">code</field>
+            <field name="code">
+from datetime import datetime, timedelta
+
+# Find tokens expiring in next 12 hours
+cutoff = datetime.now() + timedelta(hours=12)
+tokens = model.search([
+    ('active', '=', True),
+    ('expires_at', '&lt;=', cutoff),
+    ('refresh_token', '!=', False),
+])
+
+for token in tokens:
+    try:
+        token.refresh_access_token()
+    except Exception as e:
+        log(f'Error refreshing token {token.id}: {str(e)}')
+            </field>
+            <field name="interval_number">6</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+        </record>
+
+    </data>
+</odoo>
