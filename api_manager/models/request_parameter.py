@@ -32,7 +32,7 @@ class APIRequestParameter(models.Model):
 
     def get_combinations(self) -> Generator[Dict[str, str], None, None]:
         """Return list of all possible combinations for the recordset."""
-        grouped = self.group_by_key()
+        grouped = self.get_groups_by_key()
         for values in product(*grouped.values()):
             yield dict(zip(grouped.keys(), values))
 
